@@ -21,6 +21,9 @@ def get_category(category_id:int, db:Session=Depends(get_db)):
 
 @category_router.post("/", response_model=pyd.CreateCategory)
 def create_category(category:pyd.CreateCategory, db:Session=Depends(get_db)):
+    category_db=db.query(m.Category).filter(m.Category.name==category.name).first()
+    if category_db:
+        raise HTTPException(status_code=400, detail="Такая категория уже существует")
     category_db = m.Category()
     category_db.name = category.name
     db.add(category_db)
