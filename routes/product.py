@@ -9,7 +9,7 @@ product_router=APIRouter(prefix="/product", tags=["product"])
 
 @product_router.get("/", response_model=List[pyd.SchemaProduct])
 def get_all_product(db:Session=Depends(get_db)):
-    products = db.query(m.Product).all()
+    products = db.query(m.Product).order_by(m.Product.id).all()
     return products
 
 @product_router.get("/{product_id}", response_model=pyd.BaseProduct)
