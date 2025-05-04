@@ -8,14 +8,14 @@ class BaseProduct(BaseModel):
     id: int = Field(example=1)
     name: str = Field(example="Молоко")
     price: float = Field(example=10.85)
-    description: str= Field(example='Вкусное молоко')
-    image_path: str= Field(example='dsdasd')
+    description: str | None= Field(example='Вкусное молоко')
+    image_path: str | None= Field(example='dsdasd')
 
 class BaseUser(BaseModel):
     id: int = Field(example=1)
     name: str = Field(example="Иван")
     last_name: str = Field(example="Иванов")
-    patronymic: str = Field(example="Иванович")
+    patronymic: str | None = Field(example="Иванович")
     email: str = Field(example="example@mail.ru")
     phone: str = Field(example="+79123456789")
 
