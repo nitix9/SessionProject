@@ -27,6 +27,7 @@ def create_product(product:pyd.CreateProduct, db:Session=Depends(get_db)):
     product_db.price = product.price
     product_db.image_path = product.image_path
     product_db.category_id = product.category_id
+    product_db.shop_id=product.shop_id
     db.add(product_db)
     db.commit()
     return product_db
