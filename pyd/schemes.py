@@ -5,3 +5,16 @@ from typing import List
 # их нужно выносиь отдельно, чтобы избежать рекурсии в импорте
 class SchemaProduct(BaseProduct):
     category: BaseCategory
+
+class SchemaUser(BaseUser):
+    role:BaseRole
+    addresses: List[BaseAddress]
+
+class SchemaOrder(BaseOrder):
+    user: BaseUser
+    shop: BaseShop
+    address: BaseAddress
+    status: BaseOrderStatus
+
+class SchemaShop(BaseShop):
+    user:BaseUser
