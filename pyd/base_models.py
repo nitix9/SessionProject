@@ -39,6 +39,6 @@ class BaseOrderStatus(BaseModel):
 class BaseShop(BaseModel):
     id: int = Field(example=1)
     name: str = Field(example="Магазин 1")
-    description: str = Field(example="Магазин электроники")
+    description: str|None = Field(example="Магазин электроники")
     custom_domain:str = Field(example="example")
-    logo_path: str = Field(example="path/to/logo.png")
+    logo_path: str|None = Field(example="path/to/logo.png")
