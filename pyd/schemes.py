@@ -5,6 +5,7 @@ from typing import List
 # их нужно выносиь отдельно, чтобы избежать рекурсии в импорте
 class SchemaProduct(BaseProduct):
     category: BaseCategory
+    shop:BaseShop
 
 class SchemaUser(BaseUser):
     role:BaseRole
