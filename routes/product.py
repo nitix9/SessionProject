@@ -31,6 +31,19 @@ def create_product(product:pyd.CreateProduct, db:Session=Depends(get_db)):
     db.commit()
     return product_db
 
+@product_router.put("/{product_id}", response_model=pyd.CreateProduct)
+def update_product(product_id:int, product:pyd.CreateProduct, db:Session=Depends(get_db)):
+    product_db = db.query(m.Product).filter(m.Product.id==product_id).first()
+    if not product_db:
+        raise HTTPException(status_code=404, detail="Товар не найден")
+    product_db.name = product.name
+    product_db.description = product.description
+    product_db.price = product.price
+    product_db.image_path = product.image_path
+    product_db.category_id = product.category_id
+    db.commit()
+    return product_db
+
 @product_router.delete("/{product_id}")
 def delete_product(product_id:int, db:Session=Depends(get_db)):
     product = db.query(m.Product).filter(m.Product.id==product_id).first()
