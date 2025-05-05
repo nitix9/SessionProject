@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Table, DECIMAL, Date
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from sqlalchemy.sql import func
+from sqlalchemy.orm import backref
 
 class Category(Base):#1
     __tablename__ = "categories"
@@ -71,6 +72,7 @@ class Order(Base):
     shop=relationship("Shop", backref="orders")
     address=relationship("Address", backref="orders")
     status=relationship("OrderStatus", backref="orders")
+    
 
 class OrderStatus(Base):
     __tablename__ = "order_statuses"
@@ -89,3 +91,14 @@ class Shop(Base):
     logo_path = Column(String(255),nullable=True)
 
     products = relationship("Product", backref="shop", cascade="all, delete-orphan")
+
+class OrderItem(Base):
+    __tablename__ = "order_items"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    order_id = Column(Integer, ForeignKey("orders.id", ondelete="CASCADE"), nullable=False)
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    quantity = Column(Integer, nullable=False)
+
+    order = relationship("Order", backref=backref("items", cascade="all, delete-orphan"))
+    product = relationship("Product")

@@ -2,3 +2,5 @@ fastapi[standard]
 sqlalchemy
 pydantic-settings
 mysqlclient
+python-multipart
+pillow

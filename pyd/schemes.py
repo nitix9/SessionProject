@@ -16,6 +16,7 @@ class SchemaOrder(BaseOrder):
     shop: BaseShop
     address: BaseAddress
     status: BaseOrderStatus
+    items: List[BaseOrderProduct]
 
 class SchemaShop(BaseShop):
     user:BaseUser

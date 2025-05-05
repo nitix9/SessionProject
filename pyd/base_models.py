@@ -30,7 +30,6 @@ class BaseAddress(BaseModel):
 class BaseOrder(BaseModel):
     id: int = Field(example=1)
     total_price: float = Field(example=100.0)
-    created_at: str = Field(example="2023-10-01T12:00:00")
 
 class BaseOrderStatus(BaseModel):
     id: int = Field(example=1)
@@ -42,3 +41,7 @@ class BaseShop(BaseModel):
     description: str|None = Field(example="Магазин электроники")
     custom_domain:str = Field(example="example")
     logo_path: str|None = Field(example="path/to/logo.png")
+
+class BaseOrderProduct(BaseModel):
+    product_id: int
+    quantity: int 

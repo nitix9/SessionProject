@@ -1,10 +1,11 @@
 from pydantic import BaseModel, Field
+from typing import List
+from .base_models import *
 
 class CreateProduct(BaseModel):
     name: str = Field(min_length=3,max_length=255,example="Молоко")
     price: float = Field(example=10.85)
     description: str | None = Field(example='Вкусное молоко')
-    image_path: str | None = Field(example='dsdasd')
     category_id: int = Field(example=1)
     shop_id:int=Field(example=1)
 
@@ -28,8 +29,10 @@ class CreateAddress(BaseModel):
     user_id:int=Field(example=1)
 
 class CreateOrder(BaseModel):
-    total_price: float = Field(example=100.0)
-    created_at: str = Field(example="2023-10-01T12:00:00")
+    user_id:int=Field(example=1)
+    shop_id:int=Field(example=1)
+    address_id:int=Field(example=1)
+    products:List[BaseOrderProduct]
 
 class CreateOrderStatus(BaseModel):
     name: str = Field(example="Выполнен")
