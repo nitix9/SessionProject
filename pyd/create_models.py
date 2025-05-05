@@ -41,5 +41,4 @@ class CreateShop(BaseModel):
     name: str = Field(example="Магазин 1")
     description: str | None = Field(example="Магазин электроники")
     custom_domain:str = Field(example="example")
-    logo_path: str | None = Field(example="path/to/logo.png")
     user_id:int=Field(example=1)

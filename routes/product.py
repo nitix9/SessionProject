@@ -1,15 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends,UploadFile
-from fastapi import APIRouter, HTTPException, Depends,UploadFile
 from database import get_db
 from sqlalchemy.orm import Session
 import models as m
 from typing import List
 import pyd
-from config import settings
-import uuid
-from PIL import Image
-import os
-import io
 from config import settings
 import uuid
 from PIL import Image
@@ -36,7 +30,6 @@ def create_product(product:pyd.CreateProduct, db:Session=Depends(get_db)):
     product_db.name = product.name
     product_db.description = product.description
     product_db.price = product.price
-    product_db.image_path = product.image_path
     product_db.category_id = product.category_id
     product_db.shop_id=product.shop_id
     db.add(product_db)
