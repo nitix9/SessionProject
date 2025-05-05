@@ -20,3 +20,9 @@ class SchemaOrder(BaseOrder):
 
 class SchemaShop(BaseShop):
     user:BaseUser
+
+class PaginatedProducts(BaseModel):
+    total: int
+    items: List[SchemaProduct]
+    page: int
+    page_size: int

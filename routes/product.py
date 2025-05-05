@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends,UploadFile
+from fastapi import APIRouter, HTTPException, Depends,UploadFile, Query
 from database import get_db
 from sqlalchemy.orm import Session
 import models as m
@@ -9,13 +9,25 @@ import uuid
 from PIL import Image
 import os
 import io
+from sqlalchemy import func
 
 product_router=APIRouter(prefix="/product", tags=["product"])
 
-@product_router.get("/", response_model=List[pyd.SchemaProduct])
-def get_all_product(db:Session=Depends(get_db)):
-    products = db.query(m.Product).order_by(m.Product.id).all()
-    return products
+@product_router.get("/", response_model=pyd.PaginatedProducts)
+def get_all_products(
+    db: Session = Depends(get_db),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, le=100)
+):
+    total = db.query(func.count(m.Product.id)).scalar()
+    skip = (page - 1) * page_size
+    products = db.query(m.Product).order_by(m.Product.id).offset(skip).limit(page_size).all()
+    return {
+        "total": total,
+        "items": products,
+        "page": page,
+        "page_size": page_size
+    }
 
 @product_router.get("/{product_id}", response_model=pyd.BaseProduct)
 def get_product(product_id:int, db:Session=Depends(get_db)):

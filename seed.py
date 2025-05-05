@@ -28,4 +28,14 @@ with Session(bind=engine) as session:
     session.add(p1)
     p2= m.Product(name='Хлеб',category=c1, price=50, description='Хлеб ржаной', image_path='bread.jpg',shop=s1)
     session.add(p2)
+    for i in range(3, 23):
+        product = m.Product(
+            name=f'Продукт {i}',
+            category=c1,
+            price=10 * i,
+            description=f'Описание продукта {i}',
+            image_path=f'product_{i}.jpg',
+            shop=s1
+        )
+        session.add(product)
     session.commit()
