@@ -17,7 +17,7 @@ with Session(bind=engine) as session:
     a1= m.Address(address='г. Москва, ул. Ленина, д. 1', user=u1)
     session.add(a1)
     c1=m.Category(name='еда')
-    s1= m.Shop(name='Магазин 1',user=u2)
+    s1= m.Shop(name='Магазин 1',user=u2,custom_domain='shop1.example.com',description='Описание магазина 1',logo_path='logo1.png')
     st1=m.OrderStatus(name='В обработке')
     session.add(st1)
     o1=m.Order(user=u1, status=st1, total_price=0.0,shop=s1,address=a1)
@@ -38,4 +38,13 @@ with Session(bind=engine) as session:
             shop=s1
         )
         session.add(product)
+    for i in range(2, 21):
+        shop = m.Shop(
+            name=f'Магазин {i}',
+            user=u2,
+            description=f'Описание магазина {i}',
+            custom_domain=f'shop{i}.example.com',
+            logo_path=f'logo{i}.png'
+        )
+        session.add(shop)
     session.commit()

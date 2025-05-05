@@ -26,3 +26,9 @@ class PaginatedProducts(BaseModel):
     items: List[SchemaProduct]
     page: int
     page_size: int
+
+class PaginatedShops(BaseModel):
+    total: int
+    items: List[SchemaShop]
+    page: int
+    page_size: int

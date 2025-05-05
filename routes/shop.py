@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, UploadFile
+from fastapi import APIRouter, HTTPException, Depends, UploadFile,Query
 from database import get_db
 from sqlalchemy.orm import Session
 import models as m
@@ -9,12 +9,23 @@ from PIL import Image
 import os
 import io
 from config import settings
+from sqlalchemy import func
+
 shop_router=APIRouter(prefix="/shop", tags=["shop"])
 
-@shop_router.get("/", response_model=List[pyd.SchemaShop])
-def get_all_shops(db:Session=Depends(get_db)):
-    shops = db.query(m.Shop).order_by(m.Shop.id).all()
-    return shops
+@shop_router.get("/", response_model=pyd.PaginatedShops)
+def get_all_shops(db:Session=Depends(get_db),page: int = Query(1, ge=1),
+    page_size: int = Query(10, le=100)
+):
+    total = db.query(func.count(m.Shop.id)).scalar()
+    skip = (page - 1) * page_size
+    shops = db.query(m.Shop).order_by(m.Shop.id).offset(skip).limit(page_size).all()
+    return {
+        "total": total,
+        "items": shops,
+        "page": page,
+        "page_size": page_size
+    }
 
 @shop_router.get("/{shop_id}", response_model=pyd.SchemaShop)
 def get_shop(shop_id:int, db:Session=Depends(get_db)):
