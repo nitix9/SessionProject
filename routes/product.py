@@ -29,7 +29,24 @@ def get_all_products(
         "page_size": page_size
     }
 
-@product_router.get("/{product_id}", response_model=pyd.BaseProduct)
+@product_router.get("/shop/{shop_id}", response_model=pyd.PaginatedProducts)
+def get_product_byshopid(
+    shop_id:int,
+    db: Session = Depends(get_db),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, le=100)
+):
+    total = db.query(func.count(m.Product.id)).filter(m.Product.shop_id==shop_id).scalar()
+    skip = (page - 1) * page_size
+    products = db.query(m.Product).filter(m.Product.shop_id==shop_id).order_by(m.Product.id).offset(skip).limit(page_size).all()
+    return {
+        "total": total,
+        "items": products,
+        "page": page,
+        "page_size": page_size
+    }
+
+@product_router.get("/{product_id}", response_model=pyd.SchemaProduct)
 def get_product(product_id:int, db:Session=Depends(get_db)):
     product = db.query(m.Product).filter(m.Product.id==product_id).first()
     if not product:

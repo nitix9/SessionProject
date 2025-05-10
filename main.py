@@ -8,8 +8,15 @@ from routes.role import role_router
 from routes.shop import shop_router
 from routes.order import order_router
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Разрешить запросы с этого origin
+    allow_methods=["*"],  # Разрешить все методы (GET, POST, etc)
+    allow_headers=["*"],  # Разрешить все заголовки
+)
 app.include_router(product_router)
 app.include_router(category_router)
 app.include_router(user_router)
