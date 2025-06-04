@@ -10,6 +10,10 @@ class Settings(BaseSettings):
     ALLOWED_CONTENT_TYPES: List[str]=['image/png','image/webp']
     ALLOWED_EXTENSIONS: List[str]=['jpg']
     MAX_FILE_SIZE:int=2097152
+    SECRET_KEY:str
+    ALGORITHM:str
+    ACCESS_TOKEN_EXPIRE_MINUTES:int=10
+    REFRESH_TOKEN_EXPIRE_DAYS:int=30
     model_config=SettingsConfigDict(env_file=".env")
 
-settings= Settings()
+settings = Settings()

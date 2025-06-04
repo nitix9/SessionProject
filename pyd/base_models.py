@@ -1,4 +1,11 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field,EmailStr
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    email:EmailStr | None=None
 
 class BaseCategory(BaseModel):
     id:int = Field(example=1)
@@ -16,7 +23,7 @@ class BaseUser(BaseModel):
     name: str = Field(example="Иван")
     last_name: str = Field(example="Иванов")
     patronymic: str | None = Field(example="Иванович")
-    email: str = Field(example="example@mail.ru")
+    email: EmailStr = Field(example="example@mail.ru")
     phone: str = Field(example="+79123456789")
 
 class BaseRole(BaseModel):

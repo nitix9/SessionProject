@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field,EmailStr
 from typing import List
 from .base_models import *
 
@@ -17,7 +17,7 @@ class CreateUser(BaseModel):
     last_name: str = Field(example="Иванов")
     password_hash:str=Field(example="qweqwqe123")
     patronymic: str | None = Field(example="Иванович")
-    email: str = Field(example="example@mail.ru")
+    email: EmailStr = Field(example="example@mail.ru")
     role_id:int=Field(example=1)
     phone: str = Field(example="+79123456789")
 

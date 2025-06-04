@@ -1,5 +1,5 @@
 from database import Base
-from sqlalchemy import Column, Integer, String, ForeignKey, Table, DECIMAL, DateTime
+from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Table, DECIMAL, DateTime, Text
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from sqlalchemy.sql import func
@@ -19,8 +19,8 @@ class Product(Base):#N
     shop_id = Column(Integer, ForeignKey("shops.id",ondelete="CASCADE"),nullable=False)
     name = Column(String(255),nullable=False)
     price = Column(DECIMAL,nullable=False)
-    description = Column(String(255))
-    image_path= Column(String(255),nullable=False)
+    description = Column(Text)
+    image_path= Column(String(255),nullable=True)
     category_id = Column(Integer, ForeignKey("categories.id"),nullable=False)
 
     category=relationship("Category", backref="products")
@@ -43,6 +43,7 @@ class User(Base):
     role_id = Column(Integer, ForeignKey("roles.id"),nullable=False)
     created_at = Column(DateTime(), server_default=func.now())
     phone= Column(String(255),nullable=True)
+    refresh_token=Column(String(1024),nullable=True)
 
     role=relationship("Role", backref="users")
     addresses = relationship("Address", backref="user", cascade="all, delete-orphan")
@@ -89,6 +90,7 @@ class Shop(Base):
     description = Column(String(255),nullable=True)
     custom_domain = Column(String(255),nullable=True)
     logo_path = Column(String(255),nullable=True)
+    is_approved=Column(Boolean, nullable=False, default=False)
 
     products = relationship("Product", backref="shop", cascade="all, delete-orphan")
 

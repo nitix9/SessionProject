@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
+from auth import auth_handler
 from database import get_db
 from sqlalchemy.orm import Session
 import models as m
@@ -21,7 +22,7 @@ def get_address_byid(address_id:int,db:Session=Depends(get_db)):
 
 
 @address_router.post("/", response_model=pyd.BaseAddress)
-def address_add(address: pyd.CreateAddress, db:Session=Depends(get_db)):
+def address_add(address: pyd.CreateAddress, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     address_db=m.Address()
     address_db.address=address.address
     address_db.user_id=address.user_id
@@ -30,7 +31,7 @@ def address_add(address: pyd.CreateAddress, db:Session=Depends(get_db)):
     return address_db
 
 @address_router.put("/{address_id}", response_model=pyd.CreateAddress)
-def update_address(address_id:int, address:pyd.CreateAddress, db:Session=Depends(get_db)):
+def update_address(address_id:int, address:pyd.CreateAddress, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     address_db = db.query(m.Address).filter(m.Address.id==address_id).first()
     if not address_db:
         raise HTTPException(status_code=404, detail="Адрес не найден")
@@ -41,7 +42,7 @@ def update_address(address_id:int, address:pyd.CreateAddress, db:Session=Depends
     return address_db
 
 @address_router.delete("/{id}")
-def delete_address (address_id:int, db:Session=Depends(get_db)):
+def delete_address (address_id:int, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     address=db.query(m.Address).filter(m.Address.id==address_id).first()
     if not address:
         raise HTTPException(status_code=404, detail="Адрес не найден")

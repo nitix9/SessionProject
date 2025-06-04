@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
+from auth import auth_handler
 from database import get_db
 from sqlalchemy.orm import Session
 import models as m
@@ -8,19 +9,19 @@ import pyd
 order_router=APIRouter(prefix="/order", tags=["order"])
 
 @order_router.get("/", response_model=List[pyd.SchemaOrder])
-def get_all_order(db:Session=Depends(get_db)):
+def get_all_order(db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     orders = db.query(m.Order).order_by(m.Order.id).all()
     return orders
 
 @order_router.get("/{order_id}", response_model=pyd.SchemaOrder)
-def get_order(order_id:int, db:Session=Depends(get_db)):
+def get_order(order_id:int, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     order = db.query(m.Order).filter(m.Order.id==order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Заказ не найден")
     return order
 
 @order_router.post("/", response_model=pyd.SchemaOrder)
-def create_order(order:pyd.CreateOrder, db:Session=Depends(get_db)):
+def create_order(order:pyd.CreateOrder, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     total_price = 0
     for item in order.products:
         product = db.query(m.Product).filter(m.Product.id == item.product_id).first()
@@ -50,7 +51,7 @@ def create_order(order:pyd.CreateOrder, db:Session=Depends(get_db)):
     return order_db
 
 @order_router.put("/{order_id}", response_model=pyd.SchemaOrder)
-def update_order(order_id:int, order:pyd.CreateOrder, db:Session=Depends(get_db)):
+def update_order(order_id:int, order:pyd.CreateOrder, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     order_db = db.query(m.Order).filter(m.Order.id==order_id).first()
     if not order_db:
         raise HTTPException(status_code=404, detail="Заказ не найден")
@@ -83,7 +84,7 @@ def update_order(order_id:int, order:pyd.CreateOrder, db:Session=Depends(get_db)
     return order_db
 
 @order_router.delete("/{order_id}")
-def delete_order(order_id:int, db:Session=Depends(get_db)):
+def delete_order(order_id:int, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     order = db.query(m.Order).filter(m.Order.id==order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Заказ не найден")

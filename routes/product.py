@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends,UploadFile, Query
+from auth import auth_handler
 from database import get_db
 from sqlalchemy.orm import Session
 import models as m
@@ -54,7 +55,7 @@ def get_product(product_id:int, db:Session=Depends(get_db)):
     return product
 
 @product_router.post("/", response_model=pyd.CreateProduct)
-def create_product(product:pyd.CreateProduct, db:Session=Depends(get_db)):
+def create_product(product:pyd.CreateProduct, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     product_db = m.Product()
     product_db.name = product.name
     product_db.description = product.description
@@ -66,7 +67,7 @@ def create_product(product:pyd.CreateProduct, db:Session=Depends(get_db)):
     return product_db
 
 @product_router.put("/image/{product_id}", response_model=pyd.SchemaProduct)
-def upload_image(product_id:int, image:UploadFile, db:Session=Depends(get_db)):
+def upload_image(product_id:int, image:UploadFile, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     product_db=(
         db.query(m.Product).filter(m.Product.id==product_id).first()
     )
@@ -137,7 +138,7 @@ def upload_image(product_id:int, image:UploadFile, db:Session=Depends(get_db)):
     return product_db
 
 @product_router.put("/{product_id}", response_model=pyd.CreateProduct)
-def update_product(product_id:int, product:pyd.CreateProduct, db:Session=Depends(get_db)):
+def update_product(product_id:int, product:pyd.CreateProduct, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     product_db = db.query(m.Product).filter(m.Product.id==product_id).first()
     if not product_db:
         raise HTTPException(status_code=404, detail="Товар не найден")
@@ -149,7 +150,7 @@ def update_product(product_id:int, product:pyd.CreateProduct, db:Session=Depends
     return product_db
 
 @product_router.delete("/{product_id}")
-def delete_product(product_id:int, db:Session=Depends(get_db)):
+def delete_product(product_id:int, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     product = db.query(m.Product).filter(m.Product.id==product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Товар не найден")

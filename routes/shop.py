@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile,Query
+from auth import auth_handler
 from database import get_db
 from sqlalchemy.orm import Session
 import models as m
@@ -17,9 +18,10 @@ shop_router=APIRouter(prefix="/shop", tags=["shop"])
 def get_all_shops(db:Session=Depends(get_db),page: int = Query(1, ge=1),
     page_size: int = Query(10, le=100)
 ):
-    total = db.query(func.count(m.Shop.id)).scalar()
+    query=db.query(m.Shop).filter(m.Shop.is_approved == True)
+    total = query.count()
     skip = (page - 1) * page_size
-    shops = db.query(m.Shop).order_by(m.Shop.id).offset(skip).limit(page_size).all()
+    shops = query.order_by(m.Shop.id).offset(skip).limit(page_size).all()
     return {
         "total": total,
         "items": shops,
@@ -34,8 +36,8 @@ def get_shop(shop_id:int, db:Session=Depends(get_db)):
         raise HTTPException(status_code=404, detail="Магазин не найден")
     return shop
 
-@shop_router.post("/", response_model=pyd.CreateShop)
-def create_shop(shop:pyd.CreateShop, db:Session=Depends(get_db)):
+@shop_router.post("/", response_model=pyd.CreateShop,)
+def create_shop(shop:pyd.CreateShop, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     shop_db=db.query(m.Shop).filter(m.Shop.custom_domain==shop.custom_domain).first()
     if shop_db:
         raise HTTPException(status_code=400, detail="Магазин с таким доменом уже существует")
@@ -50,7 +52,7 @@ def create_shop(shop:pyd.CreateShop, db:Session=Depends(get_db)):
     return shop_db
 
 @shop_router.put("/image/{product_id}", response_model=pyd.SchemaShop)
-def upload_image(shop_id:int, image:UploadFile, db:Session=Depends(get_db)):
+def upload_image(shop_id:int, image:UploadFile, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     shop_db=(
         db.query(m.Shop).filter(m.Shop.id==shop_id).first()
     )
@@ -121,7 +123,7 @@ def upload_image(shop_id:int, image:UploadFile, db:Session=Depends(get_db)):
     return shop_db
 
 @shop_router.put("/{shop_id}", response_model=pyd.CreateShop)
-def update_shop(shop_id:int, shop:pyd.CreateShop, db:Session=Depends(get_db)):
+def update_shop(shop_id:int, shop:pyd.CreateShop, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     shop_db = db.query(m.Shop).filter(m.Shop.id==shop_id).first()
     if not shop_db:
         raise HTTPException(status_code=404, detail="Магазин не найден")
@@ -129,12 +131,11 @@ def update_shop(shop_id:int, shop:pyd.CreateShop, db:Session=Depends(get_db)):
     shop_db.name = shop.name
     shop_db.description=shop.description
     shop_db.custom_domain=shop.custom_domain
-    shop_db.logo_path=shop.logo_path
     db.commit()
     return shop_db
 
 @shop_router.delete("/{shop_id}")
-def delete_shop(shop_id:int, db:Session=Depends(get_db)):
+def delete_shop(shop_id:int, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     shop = db.query(m.Shop).filter(m.Shop.id==shop_id).first()
     if not shop:
         raise HTTPException(status_code=404, detail="Магазин не найден")

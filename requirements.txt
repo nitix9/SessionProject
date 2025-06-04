@@ -4,3 +4,5 @@ pydantic-settings
 mysqlclient
 python-multipart
 pillow
+pyjwt
+passlib[bcrypt]

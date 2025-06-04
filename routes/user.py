@@ -4,16 +4,22 @@ from sqlalchemy.orm import Session
 import models as m
 from typing import List
 import pyd
+from passlib.context import CryptContext
+from auth import auth_handler
 
 user_router=APIRouter(prefix="/users", tags=["users"])
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
 
 @user_router.get("/", response_model=List[pyd.SchemaUser])
-def get_all_users(db:Session=Depends(get_db)):
+def get_all_users(db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     users= db.query(m.User).all()
     return users
 
 @user_router.get("/{id}",response_model=pyd.BaseUser)
-def get_user_byid(user_id:int,db:Session=Depends(get_db)):
+def get_user_byid(user_id:int,db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     user=db.query(m.User).filter(m.User.id==user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
@@ -31,14 +37,14 @@ def user_reg(user: pyd.CreateUser, db:Session=Depends(get_db)):
     user_db.patronymic=user.patronymic
     user_db.email=user.email
     user_db.role_id=user.role_id
-    user_db.password_hash=user.password_hash
+    user_db.password_hash=pwd_context.hash(user.password_hash)
     user_db.phone=user.phone
     db.add(user_db)
     db.commit()
     return user_db
 
 @user_router.put("/{user_id}", response_model=pyd.CreateUser)
-def update_user(user_id:int, user:pyd.CreateUser, db:Session=Depends(get_db)):
+def update_user(user_id:int, user:pyd.CreateUser, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     user_db = db.query(m.User).filter(m.User.id==user_id).first()
     if not user_db:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
@@ -54,7 +60,7 @@ def update_user(user_id:int, user:pyd.CreateUser, db:Session=Depends(get_db)):
     return user_db
 
 @user_router.delete("/{id}")
-def delete_user (user_id:int, db:Session=Depends(get_db)):
+def delete_user (user_id:int, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     user=db.query(m.User).filter(m.User.id==user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")

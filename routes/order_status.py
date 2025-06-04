@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
+from auth import auth_handler
 from database import get_db
 from sqlalchemy.orm import Session
 import models as m
@@ -20,7 +21,7 @@ def get_order_status(order_status_id:int, db:Session=Depends(get_db)):
     return order_status
 
 @order_status_router.post("/", response_model=pyd.CreateOrderStatus)
-def create_order_status(order_status:pyd.CreateOrderStatus, db:Session=Depends(get_db)):
+def create_order_status(order_status:pyd.CreateOrderStatus, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     order_status_db=db.query(m.OrderStatus).filter(m.OrderStatus.name==order_status.name).first()
     if order_status_db:
         raise HTTPException(status_code=400, detail="Такой статус заказа уже существует")
@@ -31,7 +32,7 @@ def create_order_status(order_status:pyd.CreateOrderStatus, db:Session=Depends(g
     return order_status_db
 
 @order_status_router.put("/{order_status_id}", response_model=pyd.CreateOrderStatus)
-def update_order_status(order_status_id:int, order_status:pyd.CreateOrderStatus, db:Session=Depends(get_db)):
+def update_order_status(order_status_id:int, order_status:pyd.CreateOrderStatus, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     order_status_db = db.query(m.OrderStatus).filter(m.OrderStatus.id==order_status_id).first()
     if not order_status_db:
         raise HTTPException(status_code=404, detail="Статус заказа не найден")
@@ -40,7 +41,7 @@ def update_order_status(order_status_id:int, order_status:pyd.CreateOrderStatus,
     return order_status_db
 
 @order_status_router.delete("/{order_status_id}")
-def delete_order_statusy(order_status_id:int, db:Session=Depends(get_db)):
+def delete_order_statusy(order_status_id:int, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     order_status = db.query(m.OrderStatus).filter(m.OrderStatus.id==order_status_id).first()
     if not order_status:
         raise HTTPException(status_code=404, detail="Статус заказа не найден")

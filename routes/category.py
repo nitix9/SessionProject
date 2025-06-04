@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
+from auth import auth_handler
 from database import get_db
 from sqlalchemy.orm import Session
 import models as m
@@ -20,7 +21,7 @@ def get_category(category_id:int, db:Session=Depends(get_db)):
     return category
 
 @category_router.post("/", response_model=pyd.CreateCategory)
-def create_category(category:pyd.CreateCategory, db:Session=Depends(get_db)):
+def create_category(category:pyd.CreateCategory, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     category_db=db.query(m.Category).filter(m.Category.name==category.name).first()
     if category_db:
         raise HTTPException(status_code=400, detail="Такая категория уже существует")
@@ -31,7 +32,7 @@ def create_category(category:pyd.CreateCategory, db:Session=Depends(get_db)):
     return category_db
 
 @category_router.put("/{category_id}", response_model=pyd.CreateCategory)
-def update_category(category_id:int, category:pyd.CreateCategory, db:Session=Depends(get_db)):
+def update_category(category_id:int, category:pyd.CreateCategory, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     category_db = db.query(m.Category).filter(m.Category.id==category_id).first()
     if not category_db:
         raise HTTPException(status_code=404, detail="Категория не найдена")
@@ -40,7 +41,7 @@ def update_category(category_id:int, category:pyd.CreateCategory, db:Session=Dep
     return category_db
 
 @category_router.delete("/{category_id}")
-def delete_category(category_id:int, db:Session=Depends(get_db)):
+def delete_category(category_id:int, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     category = db.query(m.Category).filter(m.Category.id==category_id).first()
     if not category:
         raise HTTPException(status_code=404, detail="Категория не найден")
