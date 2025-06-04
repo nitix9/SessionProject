@@ -30,16 +30,19 @@ def get_all_products(
         "page_size": page_size
     }
 
-@product_router.get("/shop/{shop_id}", response_model=pyd.PaginatedProducts)
+@product_router.get("/shop/{custom_domain}", response_model=pyd.PaginatedProducts)
 def get_product_byshopid(
-    shop_id:int,
+    custom_domain:str,
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1),
     page_size: int = Query(10, le=100)
 ):
-    total = db.query(func.count(m.Product.id)).filter(m.Product.shop_id==shop_id).scalar()
+    shop = db.query(m.Shop).filter(m.Shop.custom_domain == custom_domain).first()
+    if not shop:
+        raise HTTPException(status_code=404, detail="Магазин не найден")
+    total = db.query(func.count(m.Product.id)).filter(m.Product.shop_id == shop.id).scalar()
     skip = (page - 1) * page_size
-    products = db.query(m.Product).filter(m.Product.shop_id==shop_id).order_by(m.Product.id).offset(skip).limit(page_size).all()
+    products = db.query(m.Product).filter(m.Product.shop_id==shop.id).order_by(m.Product.id).offset(skip).limit(page_size).all()
     return {
         "total": total,
         "items": products,

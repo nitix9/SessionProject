@@ -29,9 +29,9 @@ def get_all_shops(db:Session=Depends(get_db),page: int = Query(1, ge=1),
         "page_size": page_size
     }
 
-@shop_router.get("/{shop_id}", response_model=pyd.SchemaShop)
-def get_shop(shop_id:int, db:Session=Depends(get_db)):
-    shop = db.query(m.Shop).filter(m.Shop.id==shop_id).first()
+@shop_router.get("/{custom_domain}", response_model=pyd.SchemaShop)
+def get_shop(custom_domain:str, db:Session=Depends(get_db)):
+    shop = db.query(m.Shop).filter(m.Shop.custom_domain==custom_domain).first()
     if not shop:
         raise HTTPException(status_code=404, detail="Магазин не найден")
     return shop
@@ -46,12 +46,11 @@ def create_shop(shop:pyd.CreateShop, db:Session=Depends(get_db),current_user: m.
     shop_db.name = shop.name
     shop_db.description=shop.description
     shop_db.custom_domain=shop.custom_domain
-    shop_db.logo_path=shop.logo_path
     db.add(shop_db)
     db.commit()
     return shop_db
 
-@shop_router.put("/image/{product_id}", response_model=pyd.SchemaShop)
+@shop_router.put("/image/{shop_id}", response_model=pyd.SchemaShop)
 def upload_image(shop_id:int, image:UploadFile, db:Session=Depends(get_db),current_user: m.User = Depends(auth_handler.auth_wrapper)):
     shop_db=(
         db.query(m.Shop).filter(m.Shop.id==shop_id).first()
